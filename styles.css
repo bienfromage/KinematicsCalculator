@@ -1,0 +1,30 @@
+body{
+  text-align: center;
+  margin: 0;
+  background-color: #292929;
+  color: #ffffff;
+}
+
+.button{
+  color: #ffffff;
+  background-color: #0e0e0e;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.button:hover{
+  color: #0e0e0e;
+  background-color: #ffffff;
+}
+
+.inputBox{
+  border-style: solid;
+  border-color: #ffffff;
+  border-width: 5px;
+  width: 0.5em;
+  height: 0.5em;
+}
+.label{
+  display: block;
+}
