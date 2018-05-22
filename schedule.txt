@@ -1,0 +1,2 @@
+21 May - started set up, designed initial startup screen and began creating process for adding new variables
+22 May - Added dictionary and accepting user input to web-version
