@@ -32,13 +32,23 @@ function updateUI(){
       state++;
       updateUI();
       break;
-    case 3:
+    case 3://accept user input screen
       let nextId = findNextGetVal();
       if(nextId !== null){
-        setInstructions("Input the value of "+kinematicVar[nextId]+" "+nextId);
+        setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
         setBody("<input type='Number' step='any' id='inputBox'><br><button onclick='saveUserInput("+nextId+")'>Submit</button>");
       }else{
         state++;
+      }
+      break;
+    case 4://determine which equation to use
+      let equationId = chooseEquation();
+      break;
+    case 5:
+      setInstructions("Calculated Values:");
+      let total = "";
+      for(let key in kinematicVar){
+        total+=key+": "+kinematicVar[key].value+"\n";
       }
       break;
   }
@@ -74,4 +84,81 @@ function findNextGetVal(){//see if user has any more variables to enter
 
 function saveUserInput(id){
   setVal(id,document.getElementById('inputBox'));
+  setGetVal(id,false);
+  setHasVal(id,true);
+}
+
+function chooseEquation(){
+  let total = 0;
+  let counter = [];
+  for(let i = 0; i<4; i++)
+    counter.push(0);
+  
+  for(let key in kinematicVar){
+    if(kinematicVar[key].hasVal){
+      switch(key){
+        case "vo":
+          total++;
+          counter[0]++;
+          counter[1]++;
+          counter[2]++;
+          counter[3]++;
+          break;
+        case "v":
+          total++;
+          counter[0]++;
+          counter[1]++;
+          counter[3]++;
+          break;
+        case "a":
+          total++;
+          counter[0]++;
+          counter[2]++;
+          counter[3]++;
+          break;
+        case "t":
+          total++;
+          counter[0]++;
+          counter[1]++;
+          counter[2]++;
+          break;
+        case "x":
+          total++;
+          counter[1]++;
+          counter[2]++;
+          counter[3]++;
+          break;
+      }
+    }
+  }
+  
+  if(total === 5)
+    return -1;
+  
+  for(let i=0; i<counter.length;i++){
+    if(counter[i]===3)
+      return i;
+  }
+  
+  return -2;
+}
+
+function solve(equationId){
+  switch(equationId){
+    case 0:
+      if(!kinematicVar.vo.hasValue){
+        setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
+        setHasVal("vo",true);
+      }else if(!kinematicVar.v.hasValue){
+        setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
+        setHasVal("v",true);
+      }else if(!kinematicVar.a.hasValue){
+        setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
+        setHasVal("t",true);
+      }else{
+        setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
+        setHasVal("a",true);
+      }
+      break;
+  }
 }

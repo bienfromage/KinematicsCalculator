@@ -1,2 +1,3 @@
 21 May - started set up, designed initial startup screen and began creating process for adding new variables
 22 May - Added dictionary and accepting user input to both web and app version. Began creating logic to determine which equation to use in app version
+23 May - Began working on determining which equation to use and solving equations
