@@ -36,20 +36,46 @@ function updateUI(){
       let nextId = findNextGetVal();
       if(nextId !== null){
         setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
-        setBody("<input type='Number' step='any' id='inputBox'><br><button onclick='saveUserInput("+nextId+")'>Submit</button>");
+        setBody("<input type='Number' step='any' id='inputBox'><br><button class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
       }else{
         state++;
+        updateUI();
       }
       break;
     case 4://determine which equation to use
       let equationId = chooseEquation();
+      
+      if(equationId === -1){
+        state++;
+      }else if(equationId === 0){
+        if(!kinematicVar.v.hasVal){
+          setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
+          setHasVal("v",true);
+        }else if(!kinematicVar.vo.hasVal){
+          setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
+          setHasVal("vo",true);
+        }else if(!kinematicVar.a.hasVal){
+          setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
+          setHasVal("a",true);
+        }else{
+          setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
+          setHasVal("t",true);
+        }
+      }else if(equationId === 1){
+        if(!kinematicVar.x.hasVal){
+          setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2));
+          setHasVal("x",true);
+        }
+      }
+      updateUI();
       break;
     case 5:
       setInstructions("Calculated Values:");
       let total = "";
       for(let key in kinematicVar){
-        total+=key+": "+kinematicVar[key].value+"\n";
+        total+=key+": "+kinematicVar[key].value+"<br>";
       }
+      setBody(total);
       break;
   }
 }
@@ -71,7 +97,7 @@ function setGetVal(id,value){
 }
 
 function setVal(id, value){
-  kinematicVar[id].value=value;
+  kinematicVar[id].value=Number(value);
 }
 
 function findNextGetVal(){//see if user has any more variables to enter
@@ -83,15 +109,17 @@ function findNextGetVal(){//see if user has any more variables to enter
 }
 
 function saveUserInput(id){
-  setVal(id,document.getElementById('inputBox'));
+  setVal(id,document.getElementById('inputBox').value);
   setGetVal(id,false);
   setHasVal(id,true);
+  document.getElementById('inputBox').value="";
+  updateUI();
 }
 
 function chooseEquation(){
   let total = 0;
   let counter = [];
-  for(let i = 0; i<4; i++)
+  for(let i = 0; i<3; i++)
     counter.push(0);
   
   for(let key in kinematicVar){
@@ -102,31 +130,27 @@ function chooseEquation(){
           counter[0]++;
           counter[1]++;
           counter[2]++;
-          counter[3]++;
           break;
         case "v":
           total++;
           counter[0]++;
-          counter[1]++;
-          counter[3]++;
+          counter[2]++;
           break;
         case "a":
           total++;
           counter[0]++;
+          counter[1]++;
           counter[2]++;
-          counter[3]++;
           break;
         case "t":
           total++;
           counter[0]++;
           counter[1]++;
-          counter[2]++;
           break;
         case "x":
           total++;
           counter[1]++;
           counter[2]++;
-          counter[3]++;
           break;
       }
     }
