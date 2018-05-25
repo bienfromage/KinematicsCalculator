@@ -184,5 +184,19 @@ function solve(equationId){
         setHasVal("a",true);
       }
       break;
+    case 1:
+      if(!kinematicVar.x.hasValue){
+        setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value));
+        setHasVal("x",true);
+      }else if(!kinematicVar.vo.hasValue){
+        setVal("vo",(kinematicVar.x.value-0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value))/kinematicVar.t.value);
+        setHasVal("vo",true);
+      }else if(!kinematicVar.t.value){//avoid need for quadratic equation by calculating v instead of t and then letting equation 0 above calcualte for t using vo, a and t
+        setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
+        setHasVal("v",true);
+      }else{
+        setVal("a",(kinematicVar.x.value-kinematicVar.t.value*kinematicVar.vo.value)/(0.5*Math.pow(kinematicVar.t.value,2)));
+      }
+      break;
   }
 }
