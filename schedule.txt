@@ -4,4 +4,4 @@ Date,In Class,At Home
 23 May,Began working on determining which equation to use and solving equations, began writing equation solving calculator for Android app
 24 May,Began writing equation solving calculator for web version,Finished first draft of calculator for Android
 25 May,Quality Testing Android, wrote code for second equation in kinematics series for web app
-29 May,Quaility testing for Web
+29 May,Quaility testing for Web, Quality testing for Web and working on fourht equation

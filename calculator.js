@@ -48,25 +48,8 @@ function updateUI(){
       
       if(equationId === -1){
         state++;
-      }else if(equationId === 0){
-        if(!kinematicVar.v.hasVal){
-          setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
-          setHasVal("v",true);
-        }else if(!kinematicVar.vo.hasVal){
-          setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
-          setHasVal("vo",true);
-        }else if(!kinematicVar.a.hasVal){
-          setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
-          setHasVal("a",true);
-        }else{
-          setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
-          setHasVal("t",true);
-        }
-      }else if(equationId === 1){
-        if(!kinematicVar.x.hasVal){
-          setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2));
-          setHasVal("x",true);
-        }
+      }else{
+        solve(equationId);
       }
       updateUI();
       break;
@@ -77,6 +60,14 @@ function updateUI(){
         total+=key+": "+Number(kinematicVar[key].value.toFixed(10))+"<br>";
       }
       state = 0;
+      kinematicVar ={
+        "v":new KinematicVariable("velocity"),
+        "vo":new KinematicVariable("initial velocity"),
+        "a":new KinematicVariable("acceleration"),
+        "t":new KinematicVariable("time"),
+        "x":new KinematicVariable("displacement")
+      };
+      
       setBody(total+"<br><button onclick='updateUI()' class='button'>Clear</button>");
       break;
   }
@@ -177,20 +168,20 @@ function chooseEquation(){
 function solve(equationId){
   switch(equationId){
     case 0:
-      if(!kinematicVar.vo.hasValue){
+      if(!kinematicVar.vo.hasVal){
         setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
-      }else if(!kinematicVar.v.hasValue){
+      }else if(!kinematicVar.v.hasVal){
         setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
-      }else if(!kinematicVar.a.hasValue){
+      }else if(!kinematicVar.t.hasVal){
         setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
       }else{
         setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
       }
       break;
     case 1:
-      if(!kinematicVar.x.hasValue){
+      if(!kinematicVar.x.hasVal){
         setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value));
-      }else if(!kinematicVar.vo.hasValue){
+      }else if(!kinematicVar.vo.hasVal){
         setVal("vo",(kinematicVar.x.value-0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value))/kinematicVar.t.value);
       }else if(!kinematicVar.t.value){//avoid need for quadratic equation by calculating v instead of t and then letting equation 0 above calcualte for t using vo, a and t
         setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
@@ -199,26 +190,29 @@ function solve(equationId){
       }
       break;
     case 2:
-      if(!kinematicVar.v.hasValue){
+      if(!kinematicVar.v.hasVal){
         setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
-      }else if(!kinematicVar.vo.hasValue){
+      }else if(!kinematicVar.vo.hasVal){
         setVal("vo",Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
-      }else if(!kinematicVar.a.hasValue){
+      }else if(!kinematicVar.a.hasVal){
         setVal("a",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
       }else{
         setVal("x",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
       }
       break;
     case 3:
-      if(!kinematicVar.x.hasValue){
+      if(!kinematicVar.x.hasVal){
         setVal("x",(kinematicVar.v.value+kinematicVar.vo.value)/2*kinematicVar.t.value);
-      }else if(!kinematicVar.v.hasValue){
+      }else if(!kinematicVar.v.hasVal){
         setVal("v",kinematicVar.x.value/kinematicVar.t.value*2-kinematicVar.vo.value);
-      }else if(!kinematicVar.vo.hasValue){
+      }else if(!kinematicVar.vo.hasVal){
         setVal("vo",kinematicVar.x.value/kinematicVar.t.value*2-kinematicVar.v.value);
       }else{
         setVal("t",kinematicVar.x.value/(kinematicVar.v.value+kinematicVar.vo.value/2));
       }
+      break;
+    default:
+      alert("Error, you did not enter enough variables.");
       break;
   }
 }
