@@ -94,6 +94,10 @@ function setVal(id, value){
   setHasVal(id,true);
 }
 
+function setAlt(id,value){
+  kinematicVar[id].altValue = Number(value);
+}
+
 function findNextGetVal(){//see if user has any more variables to enter
   for(let key in kinematicVar){
     if(kinematicVar[key].getVal)
@@ -104,6 +108,7 @@ function findNextGetVal(){//see if user has any more variables to enter
 
 function saveUserInput(id){
   setVal(id,document.getElementById('inputBox').value);
+  setAlt(id,document.getElementById('inputBox').value);
   setGetVal(id,false);
   setHasVal(id,true);
   document.getElementById('inputBox').value="";
@@ -170,49 +175,55 @@ function solve(equationId){
     case 0:
       if(!kinematicVar.vo.hasVal){
         setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
+        setAlt("vo",kinematicVar.v.altValue-kinematicVar.a.altValue*kinematicVar.t.altValue);
       }else if(!kinematicVar.v.hasVal){
         setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
+        setAlt("v",kinematicVar.vo.altValue+kinematicVar.a.altValue*kinematicVar.t.altValue);
       }else if(!kinematicVar.t.hasVal){
         setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
+        setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.altValue)/kinematicVar.a.altValue);
       }else{
         setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
+        setAlt("a",(kinematicVar.v.altValue-kinematicVar.vo.altValue)/kinematicVar.t.altValue);
       }
       break;
     case 1:
       if(!kinematicVar.x.hasVal){
-        setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value));
+        setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2));
+        setAlt("x",kinematicVar.vo.altValue*kinematicVar.t.altValue+0.5*kinematicVar.a.altValue*Math.pow(kinematicVar.t.altValue,2));
       }else if(!kinematicVar.vo.hasVal){
-        setVal("vo",(kinematicVar.x.value-0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value))/kinematicVar.t.value);
+        setVal("vo",(kinematicVar.x.value-0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2))/kinematicVar.t.value);
+        setAlt("vo",(kinematicVar.x.altValue-0.5*kinematicVar.a.altValue*Math.pow(kinematicVar.t.altValue,2))/kinematicVar.t.altValue);
       }else if(!kinematicVar.t.value){//avoid need for quadratic equation by calculating v instead of t and then letting equation 0 above calcualte for t using vo, a and t
         setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
+        setAlt("v",-Math.sqrt(Math.pow(kinematicVar.vo.altValue,2)+2*kinematicVar.a.altValue*kinematicVar.x.altValue));
       }else{
         setVal("a",(kinematicVar.x.value-kinematicVar.t.value*kinematicVar.vo.value)/(0.5*Math.pow(kinematicVar.t.value,2)));
+        setVal("a",(kinematicVar.x.altValue-kinematicVar.t.altValue*kinematicVar.vo.altValue)/(0.5*Math.pow(kinematicVar.t.altValue,2)));
       }
       break;
     case 2:
-      if(!kinematicVar.v.hasVal){
-        setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
-      }else if(!kinematicVar.vo.hasVal){
+      //case v is non-existant is covered by case 1 above.
+      if(!kinematicVar.vo.hasVal){
         setVal("vo",Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
+        setAlt("vo",-Math.sqrt(Math.pow(kinematicVar.v.altValue,2)-2*kinematicVar.a.altValue*kinematicVar.x.altValue));
       }else if(!kinematicVar.a.hasVal){
         setVal("a",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
-      }else{
-        setVal("x",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
+        setAlt("a",(Math.pow(kinematicVar.v.altValue,2)-Math.pow(kinematicVar.vo.altValue,2))/(2*kinematicVar.x.altValue));
       }
+      //case x is non-existant is covered in cases 1 and 2
       break;
     case 3:
-      if(!kinematicVar.x.hasVal){
-        setVal("x",(kinematicVar.v.value+kinematicVar.vo.value)/2*kinematicVar.t.value);
-      }else if(!kinematicVar.v.hasVal){
-        setVal("v",kinematicVar.x.value/kinematicVar.t.value*2-kinematicVar.vo.value);
-      }else if(!kinematicVar.vo.hasVal){
+      //case x is non-existant is covered in cases 1 and 2
+      //case v is non-existant is covered in cases 1 and 2
+      if(!kinematicVar.vo.hasVal){
         setVal("vo",kinematicVar.x.value/kinematicVar.t.value*2-kinematicVar.v.value);
-      }else{
-        setVal("t",kinematicVar.x.value/(kinematicVar.v.value+kinematicVar.vo.value/2));
       }
+      //case t is non-existant is covered in cases 1 and 3
       break;
     default:
-      alert("Error, you did not enter enough variables.");
+      alert("Whoops! Make sure you enter at least three variables to perform a calculation.");
+      state=1;
       break;
   }
 }
