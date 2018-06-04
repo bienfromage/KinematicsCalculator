@@ -37,7 +37,15 @@ function updateUI(){
       let nextId = findNextGetVal();
       if(nextId !== null){
         setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
-        setBody("<input type='Number' step='any' id='inputBox'><br><button class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
+        setBody("<input type='Number' step='any' id='inputBox'/><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
+        let input = document.getElementById('inputBox');
+        input.focus();
+        input.addEventListener("keyup", (event)=>{
+          event.preventDefault();
+          if(event.keyCode === 13){
+            document.getElementById('bt').click();
+          }
+        });
       }else{
         state++;
         updateUI();
