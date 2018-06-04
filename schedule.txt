@@ -5,5 +5,6 @@ Date,In Class,At Home
 24 May,Began writing equation solving calculator for web version,Finished first draft of calculator for Android
 25 May,Quality Testing Android, wrote code for second equation in kinematics series for web app
 29 May,Quaility testing for Web, Quality testing for Web and working on fourth equation
-30 May, Quality testing for Web and added metadata and Quality testing for app
-31 May,
+30 May,Quality testing for Web and added metadata and Quality testing for app
+31 May,,App icon, portrait splash screen
+4 Jun,

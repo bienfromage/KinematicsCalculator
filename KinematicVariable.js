@@ -6,4 +6,5 @@ let KinematicVariable = function(name){
   this.altValue = 0;
   this.getVal = false;
   this.hasVal = false;
+  this.hasAltVal = false;
 };
