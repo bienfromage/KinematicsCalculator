@@ -14,6 +14,11 @@ let kinematicVar ={
 //control flow method, changes UI to accept new input and display final output
 function updateUI(){
   switch(state){
+    case -1://regenerate original HTML screen in the event that the user presses the restart button
+      state++;
+      setInstructions("Welcome to the Kinematics Calculator! Press start to begin");
+      setBody("<button class='button' onclick='updateUI()'>Start</button>");
+      break;
     case 0://start button press - move on to next screen
       state++;
       updateUI();
@@ -24,15 +29,23 @@ function updateUI(){
       state++;
       break;
     case 2://Variable Storage: not an actual screen, for each loop iterates through dictionary and decides which variables it will need to ask the user for
-      //TODO: determine if user actually has selected enough variables to continue
+      
+      let total = 0;
+      
       for(let key in kinematicVar){
         if(document.getElementById(key).checked){
           setGetVal(key,true);
+          total++;
         }
       }
-      state++;
-      updateUI();
-      break;
+      if(total > 2){
+        state++;
+        updateUI();
+        break;
+      }else{
+        alert("Whoops! Looks like you did not enter at least three variables.");
+      }
+    break;
     case 3://accept user input screen
       let nextId = findNextGetVal();
       if(nextId !== null){
@@ -61,7 +74,7 @@ function updateUI(){
       }
       updateUI();
       break;
-    case 5:
+    case 5://display calculated values and offer restart option
       setInstructions("Calculated Values:");
       let total = "";
       for(let key in kinematicVar){
@@ -70,7 +83,7 @@ function updateUI(){
           total+=" or "+kinematicVar[key].altValue;
         total+="<br>";
       }
-      state = 0;
+      state = -1;
       kinematicVar ={
         "v":new KinematicVariable("velocity"),
         "vo":new KinematicVariable("initial velocity"),
@@ -118,7 +131,7 @@ function findNextGetVal(){//see if user has any more variables to enter
   return null;
 }
 
-function saveUserInput(id){
+function saveUserInput(id){//save input from input screen into global variable for later calculations
   setVal(id,document.getElementById('inputBox').value);
   setGetVal(id,false);
   setHasVal(id,true);
@@ -126,7 +139,7 @@ function saveUserInput(id){
   updateUI();
 }
 
-function chooseEquation(){
+function chooseEquation(){//decide which equations I can use based on the given data
   let total = 0;
   let counter = [];
   for(let i = 0; i<4; i++)
@@ -181,7 +194,7 @@ function chooseEquation(){
   return -2;
 }
 
-function solve(equationId){
+function solve(equationId){//solve for a variable using a given equation
   switch(equationId){
     case 0:
       if(!kinematicVar.vo.hasVal){
@@ -191,7 +204,9 @@ function solve(equationId){
       }else if(!kinematicVar.t.hasVal){
         setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
         if(kinematicVar.v.hasAltVal)
-          setAlt("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
+          setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.value)/kinematicVar.a.value);
+        else if(kinematicVar.vo.hasAltVal)
+          setAlt("t",(kinematicVar.v.value-kinematicVar.vo.altValue)/kinematicVar.a.value);
       }else{
         setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
       }
@@ -212,6 +227,7 @@ function solve(equationId){
       //case v is non-existant is covered by case 1 above.
       if(!kinematicVar.vo.hasVal){
         setVal("vo",Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
+        setAlt("vo",-Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
       }else if(!kinematicVar.a.hasVal){
         setVal("a",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
       }
