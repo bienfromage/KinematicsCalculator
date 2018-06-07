@@ -8,4 +8,4 @@ Date,In Class,At Home
 30 May,Quality testing for Web and added metadata and Quality testing for app
 31 May,,App icon, portrait splash screen
 4 Jun,Improved altSolution algorithm for web app and improved input screen for Android, improved styling for Web
-5 Jun,Completed Web Quality Testing
+5 Jun,Completed Web Quality Testing and began 2d Kinematics Calculator for Android,Worked on 2d Kinematic Calculator

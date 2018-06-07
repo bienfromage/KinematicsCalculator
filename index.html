@@ -10,13 +10,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" type="text/css" href="styles.css"/>
-    <script src="KinematicVariable.js"></script>
+    <script src="KinematicsVariable.js"></script>
+    <script src="KinematicsVariable2D.js"></script>
     <script src="calculator.js"></script>
   </head>
   <body>
     <noscript>Error: JavaScript is disabled. This calculator will be unable to perform its primary functions</noscript>
-    <h1 id="instructions">Welcome to the Kinematics Calculator! Press start to begin</h1>
+    <h1 id="instructions">Choose which type of Calculation you'd like to perform</h1>
     <div id="interactionBody">
+      <select id='select'>
+        <option value="0">1D Kinematics</option>
+        <option value="1">2D Kinematics</option>
+      </select>
       <button class="button" onclick="updateUI()">Start</button>
     </div>
   </body>

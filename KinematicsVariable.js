@@ -1,3 +1,5 @@
+/*1d Varible - purpose is to store value of kinematic variable*/
+
 "use strict";
 
 let KinematicVariable = function(name){
@@ -7,4 +9,8 @@ let KinematicVariable = function(name){
   this.getVal = false;
   this.hasVal = false;
   this.hasAltVal = false;
+  
+  this.getValue = function(){
+    return this.value;
+  };
 };

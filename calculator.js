@@ -1,15 +1,30 @@
 "use strict";
 
 let state = 0;
+let type = 0;
+let kinematicVar;
+let calcX = true;
 
 //set up dictionary of variables. KinematicVariable is defined in KinematicVariable.js
-let kinematicVar ={
-  "v":new KinematicVariable("velocity"),
-  "vo":new KinematicVariable("initial velocity"),
-  "a":new KinematicVariable("acceleration"),
-  "t":new KinematicVariable("time"),
-  "x":new KinematicVariable("displacement")
-};
+function initDictionary(type){
+  if(type === 0){
+    kinematicVar ={
+      "v":new KinematicVariable("velocity"),
+      "vo":new KinematicVariable("initial velocity"),
+      "a":new KinematicVariable("acceleration"),
+      "t":new KinematicVariable("time"),
+      "x":new KinematicVariable("displacement")
+    };
+  }else{
+    kinematicVar ={
+      "v":new KinematicVariable2D("velocity"),
+      "vo":new KinematicVariable2D("initial velocity"),
+      "a":new KinematicVariable2D("acceleration"),
+      "t":new KinematicVariable2D("time"),
+      "x":new KinematicVariable2D("displacement")
+    };
+  }
+}
 
 //control flow method, changes UI to accept new input and display final output
 function updateUI(){
@@ -17,9 +32,11 @@ function updateUI(){
     case -1://regenerate original HTML screen in the event that the user presses the restart button
       state++;
       setInstructions("Welcome to the Kinematics Calculator! Press start to begin");
-      setBody("<button class='button' onclick='updateUI()'>Start</button>");
+      setBody("<select id='select'><option value='0'>1D Kinematics<option value='1'>2D Kinematics</select><button class=button onclick='updateUI()'>Start</button>");
       break;
     case 0://start button press - move on to next screen
+      type = Number(document.getElementById("select").value);
+      initDictionary(type);
       state++;
       updateUI();
       break;
@@ -50,7 +67,10 @@ function updateUI(){
       let nextId = findNextGetVal();
       if(nextId !== null){
         setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
-        setBody("<input type='Number' step='any' id='inputBox'/><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
+        if(type === 0)
+          setBody("<input type='Number' step='any' id='inputBox'/><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
+        else
+          setBody("<label>magnitude:<input type='Number' step='any' id='inputBox'/></label><br><label>angle:<input type='Number' step='any' id='inputBoxAngle'/></label><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
         let input = document.getElementById('inputBox');
         input.focus();
         input.addEventListener("keyup", (event)=>{
@@ -76,23 +96,25 @@ function updateUI(){
       break;
     case 5://display calculated values and offer restart option
       setInstructions("Calculated Values:");
-      let total = "";
-      for(let key in kinematicVar){
-        total+=key+" ("+kinematicVar[key].fullName+"): "+Number(kinematicVar[key].value);
-        if(kinematicVar[key].hasAltVal)
-          total+=" or "+kinematicVar[key].altValue;
-        total+="<br>";
+      let final = "";
+      if(type === 0){
+        for(let key in kinematicVar){
+          final+=key+" ("+kinematicVar[key].fullName+"): "+Number(kinematicVar[key].value);
+          if(kinematicVar[key].hasAltVal)
+            final+=" or "+kinematicVar[key].altValue;
+         final+="<br>";
+        }
+      }else{
+        for(let key in kinematicVar){
+          final+=key+" ("+kinematicVar[key].fullName+"): "+Number(kinematicVar[key].value) +" at "+Number(kinematicVar[key].angle*180/Math.PI)+" degrees";
+          if(kinematicVar[key].hasAltVal)
+            final+=" or "+kinematicVar[key].altValue+" at "+Number(kinematicVar[key].altAngle*180/Math.PI);
+         final+="<br>";
+        }
       }
       state = -1;
-      kinematicVar ={
-        "v":new KinematicVariable("velocity"),
-        "vo":new KinematicVariable("initial velocity"),
-        "a":new KinematicVariable("acceleration"),
-        "t":new KinematicVariable("time"),
-        "x":new KinematicVariable("displacement")
-      };
       
-      setBody(total+"<br><button onclick='updateUI()' class='button'>Restart</button>");
+      setBody(final+"<br><button onclick='updateUI()' class='button'>Restart</button>");
       break;
   }
 }
@@ -118,9 +140,42 @@ function setVal(id, value){
   setHasVal(id,true);
 }
 
+function setCalculatedVal(id, value){
+  if(type === 1){
+    if(calcX){
+      kinematicVar[id].x=Number(value);
+      calcX = false;
+    }else{
+      kinematicVar[id].y=Number(value);
+      kinematicVar[id].calculate();
+      calcX=true;
+      setHasVal(id,true);
+    }
+  }else{
+    kinematicVar[id].value=Number(value);
+    setHasVal(id,true);
+  }
+}
+
+function setAngleVal(id,value){
+  kinematicVar[id].angle=Number(value)*Math.PI/180;
+}
+
 function setAlt(id,value){
-  kinematicVar[id].altValue = Number(value);
-  kinematicVar[id].hasAltVal = true;
+  if(type === 1){
+    if(calcX){
+      kinematicVar[id].altX=Number(value);
+      calcX = false;
+    }else{
+      kinematicVar[id].altY=Number(value);
+      kinematicVar[id].altCalculate();
+      calcX=true;
+      kinematicVar[id].hasAltVal=true;
+    }
+  }else{
+    kinematicVar[id].altValue=Number(value);
+    setHasVal(id,true);
+  }
 }
 
 function findNextGetVal(){//see if user has any more variables to enter
@@ -132,10 +187,32 @@ function findNextGetVal(){//see if user has any more variables to enter
 }
 
 function saveUserInput(id){//save input from input screen into global variable for later calculations
-  setVal(id,document.getElementById('inputBox').value);
+  let input = document.getElementById('inputBox');
+  let val = input.value;
+  if(!val){
+    alert("It seems you have not entered a value, please try again");
+    return;
+  }
+  setVal(id,input.value);
   setGetVal(id,false);
-  setHasVal(id,true);
-  document.getElementById('inputBox').value="";
+  input.value="";
+  
+  if(type === 1){
+    input = document.getElementById('inputBoxAngle');
+    val = input.value;
+    if(!val){
+      setGetVal(id,true);
+      setHasVal(id,false);
+      alert("It seems you have not entered a value for the angle, please try again");
+      return;
+    }
+    setAngleVal(id,input.value);
+    
+    kinematicVar[id].calculateComponents();//get x and y components of kinematic value already entered
+    
+    input.value="";
+  }
+  
   updateUI();
 }
 
@@ -198,38 +275,38 @@ function solve(equationId){//solve for a variable using a given equation
   switch(equationId){
     case 0:
       if(!kinematicVar.vo.hasVal){
-        setVal("vo",kinematicVar.v.value-kinematicVar.a.value*kinematicVar.t.value);
+        setCalculatedVal("vo",kinematicVar.v.getValue()-kinematicVar.a.getValue()*kinematicVar.t.getValue());
       }else if(!kinematicVar.v.hasVal){
-        setVal("v",kinematicVar.vo.value+kinematicVar.a.value*kinematicVar.t.value);
+        setCalculatedVal("v",kinematicVar.vo.getValue()+kinematicVar.a.getValue()*kinematicVar.t.getValue());
       }else if(!kinematicVar.t.hasVal){
-        setVal("t",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.a.value);
+        setCalculatedVal("t",(kinematicVar.v.getValue()-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
         if(kinematicVar.v.hasAltVal)
-          setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.value)/kinematicVar.a.value);
+          setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
         else if(kinematicVar.vo.hasAltVal)
-          setAlt("t",(kinematicVar.v.value-kinematicVar.vo.altValue)/kinematicVar.a.value);
+          setAlt("t",(kinematicVar.v.getValue()-kinematicVar.vo.altValue)/kinematicVar.a.getValue());
       }else{
-        setVal("a",(kinematicVar.v.value-kinematicVar.vo.value)/kinematicVar.t.value);
+        setCalculatedVal("a",(kinematicVar.v.getValue()-kinematicVar.vo.getValue())/kinematicVar.t.getValue());
       }
       break;
     case 1:
       if(!kinematicVar.x.hasVal){
-        setVal("x",kinematicVar.vo.value*kinematicVar.t.value+0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2));
+        setCalculatedVal("x",kinematicVar.vo.getValue()*kinematicVar.t.getValue()+0.5*kinematicVar.a.getValue()*Math.pow(kinematicVar.t.getValue(),2));
       }else if(!kinematicVar.vo.hasVal){
-        setVal("vo",(kinematicVar.x.value-0.5*kinematicVar.a.value*Math.pow(kinematicVar.t.value,2))/kinematicVar.t.value);
-      }else if(!kinematicVar.t.value){//avoid need for quadratic equation by calculating v instead of t and then letting equation 0 above calcualte for t using vo, a and t
-        setVal("v",Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
-        setAlt("v",-Math.sqrt(Math.pow(kinematicVar.vo.value,2)+2*kinematicVar.a.value*kinematicVar.x.value));
+        setCalculatedVal("vo",(kinematicVar.x.getValue()-0.5*kinematicVar.a.getValue()*Math.pow(kinematicVar.t.getValue(),2))/kinematicVar.t.getValue());
+      }else if(!kinematicVar.t.getValue()){//avoid need for quadratic equation by calculating v instead of t and then letting equation 0 above calcualte for t using vo, a and t
+        setCalculatedVal("v",Math.sqrt(Math.pow(kinematicVar.vo.getValue(),2)+2*kinematicVar.a.getValue()*kinematicVar.x.getValue()));
+        setAlt("v",-Math.sqrt(Math.pow(kinematicVar.vo.getValue(),2)+2*kinematicVar.a.getValue()*kinematicVar.x.getValue()));
       }else{
-        setVal("a",(kinematicVar.x.value-kinematicVar.t.value*kinematicVar.vo.value)/(0.5*Math.pow(kinematicVar.t.value,2)));
+        setCalculatedVal("a",(kinematicVar.x.getValue()-kinematicVar.t.getValue()*kinematicVar.vo.getValue())/(0.5*Math.pow(kinematicVar.t.getValue(),2)));
       }
       break;
     case 2:
       //case v is non-existant is covered by case 1 above.
       if(!kinematicVar.vo.hasVal){
-        setVal("vo",Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
-        setAlt("vo",-Math.sqrt(Math.pow(kinematicVar.v.value,2)-2*kinematicVar.a.value*kinematicVar.x.value));
+        setCalculatedVal("vo",Math.sqrt(Math.pow(kinematicVar.v.getValue(),2)-2*kinematicVar.a.getValue()*kinematicVar.x.getValue()));
+        setAlt("vo",-Math.sqrt(Math.pow(kinematicVar.v.getValue(),2)-2*kinematicVar.a.getValue()*kinematicVar.x.getValue()));
       }else if(!kinematicVar.a.hasVal){
-        setVal("a",(Math.pow(kinematicVar.v.value,2)-Math.pow(kinematicVar.vo.value,2))/(2*kinematicVar.x.value));
+        setCalculatedVal("a",(Math.pow(kinematicVar.v.getValue(),2)-Math.pow(kinematicVar.vo.getValue(),2))/(2*kinematicVar.x.getValue()));
       }
       //case x is non-existant is covered in cases 1 and 2
       break;
@@ -237,7 +314,7 @@ function solve(equationId){//solve for a variable using a given equation
       //case x is non-existant is covered in cases 1 and 2
       //case v is non-existant is covered in cases 1 and 2
       if(!kinematicVar.vo.hasVal){
-        setVal("vo",kinematicVar.x.value/kinematicVar.t.value*2-kinematicVar.v.value);
+        setCalculatedVal("vo",kinematicVar.x.getValue()/kinematicVar.t.getValue()*2-kinematicVar.v.getValue());
       }
       //case t is non-existant is covered in cases 1 and 3
       break;
