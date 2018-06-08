@@ -20,7 +20,7 @@ function initDictionary(type){
       "v":new KinematicVariable2D("velocity"),
       "vo":new KinematicVariable2D("initial velocity"),
       "a":new KinematicVariable2D("acceleration"),
-      "t":new KinematicVariable2D("time"),
+      "t":new KinematicVariable("time"),//time does not have a direction, it is always one dimensional
       "x":new KinematicVariable2D("displacement")
     };
   }
@@ -67,7 +67,7 @@ function updateUI(){
       let nextId = findNextGetVal();
       if(nextId !== null){
         setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
-        if(type === 0)
+        if(type === 0 || nextId === "t")//time is one d and therefore should only accept one variable
           setBody("<input type='Number' step='any' id='inputBox'/><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
         else
           setBody("<label>magnitude:<input type='Number' step='any' id='inputBox'/></label><br><label>angle:<input type='Number' step='any' id='inputBoxAngle'/></label><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
@@ -97,21 +97,21 @@ function updateUI(){
     case 5://display calculated values and offer restart option
       setInstructions("Calculated Values:");
       let final = "";
-      if(type === 0){
-        for(let key in kinematicVar){
+      
+      for(let key in kinematicVar){
+        if(type === 0 || key === "t"){
           final+=key+" ("+kinematicVar[key].fullName+"): "+Number(kinematicVar[key].value);
           if(kinematicVar[key].hasAltVal)
             final+=" or "+kinematicVar[key].altValue;
          final+="<br>";
-        }
-      }else{
-        for(let key in kinematicVar){
+        }else{
           final+=key+" ("+kinematicVar[key].fullName+"): "+Number(kinematicVar[key].value) +" at "+Number(kinematicVar[key].angle*180/Math.PI)+" degrees";
           if(kinematicVar[key].hasAltVal)
-            final+=" or "+kinematicVar[key].altValue+" at "+Number(kinematicVar[key].altAngle*180/Math.PI);
+            final+=" or "+kinematicVar[key].altValue+" at "+Number(kinematicVar[key].altAngle*180/Math.PI)+" degrees";
          final+="<br>";
         }
       }
+      
       state = -1;
       
       setBody(final+"<br><button onclick='updateUI()' class='button'>Restart</button>");
@@ -141,7 +141,10 @@ function setVal(id, value){
 }
 
 function setCalculatedVal(id, value){
-  if(type === 1){
+  if(type === 0 || id === "t"){
+    kinematicVar[id].value=Number(value);
+    setHasVal(id,true);
+  }else{
     if(calcX){
       kinematicVar[id].x=Number(value);
       calcX = false;
@@ -151,9 +154,6 @@ function setCalculatedVal(id, value){
       calcX=true;
       setHasVal(id,true);
     }
-  }else{
-    kinematicVar[id].value=Number(value);
-    setHasVal(id,true);
   }
 }
 
@@ -162,19 +162,17 @@ function setAngleVal(id,value){
 }
 
 function setAlt(id,value){
-  if(type === 1){
+  if(type === 0 || id === "t"){
+    kinematicVar[id].altValue=Number(value);
+    kinematicVar[id].hasAltVal=true;
+  }else{
     if(calcX){
       kinematicVar[id].altX=Number(value);
-      calcX = false;
+      kinematicVar[id].altCalculate();
+      kinematicVar[id].hasAltVal=true;
     }else{
       kinematicVar[id].altY=Number(value);
-      kinematicVar[id].altCalculate();
-      calcX=true;
-      kinematicVar[id].hasAltVal=true;
     }
-  }else{
-    kinematicVar[id].altValue=Number(value);
-    setHasVal(id,true);
   }
 }
 
@@ -197,7 +195,7 @@ function saveUserInput(id){//save input from input screen into global variable f
   setGetVal(id,false);
   input.value="";
   
-  if(type === 1){
+  if(type === 1 && id !== "t"){
     input = document.getElementById('inputBoxAngle');
     val = input.value;
     if(!val){
@@ -279,11 +277,22 @@ function solve(equationId){//solve for a variable using a given equation
       }else if(!kinematicVar.v.hasVal){
         setCalculatedVal("v",kinematicVar.vo.getValue()+kinematicVar.a.getValue()*kinematicVar.t.getValue());
       }else if(!kinematicVar.t.hasVal){
-        setCalculatedVal("t",(kinematicVar.v.getValue()-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
-        if(kinematicVar.v.hasAltVal)
-          setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
-        else if(kinematicVar.vo.hasAltVal)
-          setAlt("t",(kinematicVar.v.getValue()-kinematicVar.vo.altValue)/kinematicVar.a.getValue());
+        if(type === 0)
+          setCalculatedVal("t",(kinematicVar.v.getValue()-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
+        else
+          setCalculatedVal("t",Math.sqrt(Math.pow((kinematicVar.v.x-kinematicVar.vo.x)/kinematicVar.a.x,2)+Math.pow((kinematicVar.v.y-kinematicVar.vo.y)/kinematicVar.a.y,2)));
+          
+        if(kinematicVar.v.hasAltVal){
+          if(type === 0)
+            setAlt("t",(kinematicVar.v.altValue-kinematicVar.vo.getValue())/kinematicVar.a.getValue());
+          else
+            setAlt("t",Math.sqrt(Math.pow((kinematicVar.v.altX-kinematicVar.vo.x)/kinematicVar.a.x,2)+Math.pow((kinematicVar.v.altY-kinematicVar.vo.y)/kinematicVar.a.y,2)));
+        }else if(kinematicVar.vo.hasAltVal){
+          if(type === 0)
+            setAlt("t",(kinematicVar.v.getValue()-kinematicVar.vo.altValue)/kinematicVar.a.getValue());
+          else
+            setAlt("t",Math.sqrt(Math.pow((kinematicVar.v.x-kinematicVar.vo.altX)/kinematicVar.a.x,2)+Math.pow((kinematicVar.v.y-kinematicVar.vo.altY)/kinematicVar.a.y,2)));
+        }
       }else{
         setCalculatedVal("a",(kinematicVar.v.getValue()-kinematicVar.vo.getValue())/kinematicVar.t.getValue());
       }

@@ -23,16 +23,6 @@ let KinematicVariable2D = function(name){
       return this.y;
   };
   
-  this.setCalculatedAltValue = function(value){
-    if(calcX){
-      this.altX=value;
-    }else{
-      this.altY=value;
-      this.altCalculate();
-      this.hasAltVal=true;
-    }
-  };
-  
   this.calculate = function(){
     this.value=Math.sqrt(Math.pow(this.x,2)+Math.pow(this.y,2));
     this.angle=Math.atan2(this.y,this.x);
