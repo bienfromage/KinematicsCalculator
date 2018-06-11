@@ -11,4 +11,5 @@ Date,In Class,At Home
 5 Jun,Completed Web Quality Testing and began 2d Kinematics Calculator for Android,Worked on 2d Kinematic Calculator
 6 Jun,2d work,2d work
 7 Jun,finished 2d in both app and web however both have glitches and time is in 2d,
-8 Jun,more work on 2d removed 2d from time on web,
+8 Jun,more work on 2d removed 2d from time on web,finished web basic calculator functions
+11 Jun,improved styling and code comprehensability,added app icon and posted to open web

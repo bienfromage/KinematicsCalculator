@@ -31,8 +31,8 @@ function updateUI(){
   switch(state){
     case -1://regenerate original HTML screen in the event that the user presses the restart button
       state++;
-      setInstructions("Welcome to the Kinematics Calculator! Press start to begin");
-      setBody("<select id='select'><option value='0'>1D Kinematics<option value='1'>2D Kinematics</select><button class=button onclick='updateUI()'>Start</button>");
+      setInstructions("Choose which type of calculation you would like to perform");
+      setBody("<select id='select'><option value='0'>1D Kinematics</option><option value='1'>2D Kinematics</option></select><button class='button' onclick='updateUI()'>Start</button>");
       break;
     case 0://start button press - move on to next screen
       type = Number(document.getElementById("select").value);
@@ -42,7 +42,17 @@ function updateUI(){
       break;
     case 1://variable choice screen: user chooses which variables he already knows and then presses "Continue" button to move on to the next screen
       setInstructions("Choose which variables you already know");
-      setBody("<label class='label'>vo (initial velocity)<input type='checkbox' id='vo'></label><label class='label'>v (final velocity)<input type='checkbox' id='v'></label><label class='label'>a (acceleration)<input type='checkbox' id='a'></label><label class='label'>t (time)<input type='checkbox' id='t'></label><label class='label'>x (displacement)<input type='checkbox' id='x'></label><button class='button' onclick='updateUI()'>Continue</button>");
+      
+      let checkboxString = "";
+      
+      for(let key in kinematicVar){
+        checkboxString+="<h3>"+key+" ("+kinematicVar[key].fullName+")</h3><div class='checkbox'><input type='checkbox' id='"+key+"'/><label for='"+key+"'></label></div>";
+      }
+      
+      checkboxString+="<button class='button' onclick='updateUI()'>Continue</button>";
+      
+      setBody(checkboxString);
+      
       state++;
       break;
     case 2://Variable Storage: not an actual screen, for each loop iterates through dictionary and decides which variables it will need to ask the user for
@@ -67,18 +77,34 @@ function updateUI(){
       let nextId = findNextGetVal();
       if(nextId !== null){
         setInstructions("Input the value of "+kinematicVar[nextId].fullName+" "+nextId);
-        if(type === 0 || nextId === "t")//time is one d and therefore should only accept one variable
+        if(type === 0 || nextId === "t"){//time is one d and therefore should only accept one variable
           setBody("<input type='Number' step='any' id='inputBox'/><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
-        else
+          const input = document.getElementById('inputBox');
+          input.focus();
+          input.addEventListener("keyup", (event)=>{
+            event.preventDefault();
+            if(event.keyCode === 13){
+              document.getElementById('bt').click();
+            }
+          });
+        }else{
           setBody("<label>magnitude:<input type='Number' step='any' id='inputBox'/></label><br><label>angle:<input type='Number' step='any' id='inputBoxAngle'/></label><br><button id='bt' class = 'button' onclick=\"saveUserInput('"+nextId+"')\">Submit</button>");
-        let input = document.getElementById('inputBox');
-        input.focus();
-        input.addEventListener("keyup", (event)=>{
-          event.preventDefault();
-          if(event.keyCode === 13){
-            document.getElementById('bt').click();
-          }
-        });
+          const input = document.getElementById('inputBox');
+          const angleInput = document.getElementById('inputBoxAngle');
+          input.focus();
+          input.addEventListener("keyup", (event)=>{
+            event.preventDefault();
+            if(event.keyCode === 13){
+              angleInput.focus();
+            }
+          });
+          angleInput.addEventListener("keyup",(event)=>{
+            event.preventDefault();
+            if(event.keyCode === 13){
+              document.getElementById('bt').click();
+            }
+          });
+        }
       }else{
         state++;
         updateUI();
