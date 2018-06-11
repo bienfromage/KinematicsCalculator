@@ -54,7 +54,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-#inputBox{
+#inputBox, #inputBoxAngle{
   border-style: none none solid none;
   border-color: #ffffff;
   border-width: 0 0 3px 0;
@@ -64,7 +64,7 @@ input::-webkit-inner-spin-button {
   color: #ffffff;
 }
 
-#inputBox:focus{
+#inputBox:focus,#inputBoxAngle:focus{
   outline-width: 0;
 }
 
