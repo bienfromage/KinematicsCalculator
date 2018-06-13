@@ -13,3 +13,5 @@ Date,In Class,At Home
 7 Jun,finished 2d in both app and web however both have glitches and time is in 2d,
 8 Jun,more work on 2d removed 2d from time on web,finished web basic calculator functions
 11 Jun,improved styling and code comprehensability,added app icon and posted to open web
+12 Jun,added rich content metadata to web, improved app styling
+13 Jun,added action ribbon to web

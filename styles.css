@@ -6,6 +6,43 @@ body{
   font-family: arial;
 }
 
+.ribbon{
+  position: fixed;
+  height: 4em;
+  top: 0;
+  background: #1e1e1e;
+  color: #ffffff;
+  width: 100%;
+}
+
+.ribbon a{
+  height: inherit;
+  line-height: 4em;
+  margin-left:10px;
+  margin-right:10px;
+  float:left;
+  cursor: pointer;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.ribbon a:hover{
+  color: #acacac;
+}
+
+h1{
+  margin-top:110px;
+}
+
+.logo{
+  height: 2em;
+  background-color:#ffffff;
+  border-radius: 50%;
+  padding: 0.1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 /*select spinner styling*/
 
 .custom-select{
@@ -20,6 +57,7 @@ select{
   padding: 10px;
   border-radius: 2px;
   border-width: 2px;
+  border-color: #ffffff;
   margin-right: 10px;
 }
 
@@ -38,6 +76,7 @@ select:focus{
   margin-top: 10px;
   border-radius: 2px;
   transition:all 0.3s;
+  text-decoration: none;
 }
 
 .button:hover{
@@ -100,4 +139,10 @@ input[type="checkbox"]{
 
 .checkbox input[type="checkbox"]:checked + label {
   left: 27px;
+}
+
+.github-mark{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
